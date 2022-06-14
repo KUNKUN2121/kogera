@@ -84,6 +84,16 @@ io.sockets.on('connection', function(socket) {
         console.log(userAry[i]+' '+selectcard);
       };
   });
+    // again ? 再度ひく
+    socket.on('again', function(data) {
+      var id = socket.id;
+      var personalMessage = shuffledCard.pop(); 
+      console.log('again');
+      io.to(id).emit('card_post', {value : personalMessage});
+  });
+
+
+
 
 
     // S07. client_to_server_broadcastイベント・データを受信し、送信元以外に送信する

@@ -37,6 +37,7 @@
                 <h1 >スタートまち</h1>
             </div>
             <button id="start_post">開始する</button>
+            <button id="again">もう一度引く</button>
             <div id="gamevalue"></div>
         </div>
     </div>
@@ -45,6 +46,7 @@
 
 <script>
         $('#game').hide();
+        $('#again').hide();
         // socketio接続
         var socket = io.connect();
         var isEnter = false;
@@ -66,10 +68,18 @@
         }
 
         socket.on("card_post", function(data){card_post(data.value)});
-        function card_post(text) {
-            console.log(text);
-            $("#gamevalue").append("<h1>" + text + "</h1>");
+        function card_post(card) {
+            console.log(card);
+            $("#gamevalue").append("<h1>" + card + "</h1>");
+            if(card == '?'){
+                $('#again').show();
+                // socket.emit("again", {value : 'again'});
+            }
         }
+        $('#again').on('click', function() {
+            socket.emit("again", {value : 'again'});
+        });
+
 
 
 
