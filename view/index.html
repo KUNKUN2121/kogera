@@ -35,31 +35,40 @@
             <div class="box">
             <div id="waiting">
                 <h1 >スタートまち</h1>
-                <button id="start_post">開始する</button>
             </div>
-            <div id="game"></div>
+            <button id="start_post">開始する</button>
+            <div id="gamevalue"></div>
         </div>
     </div>
 
 
 
 <script>
-            $('#game').hide();
+        $('#game').hide();
         // socketio接続
         var socket = io.connect();
         var isEnter = false;
         // var name = '';
         
-        socket.on("server_to_client", function(data){appendMsg(data.value)});
-        function appendMsg(text) {
-            console.log(text);
-            $("#chatLogs").append("<div>" + text + "</div>");
-        }
+        // socket.on("server_to_client", function(data){appendMsg(data.value)});
+        // function appendMsg(text) {
+        //     console.log(text);
+        //     $("#chatLogs").append("<div>" + text + "</div>");
+        // }
 
         socket.on("start_post", function(data){start_post(data.value)});
         function start_post(text) {
             console.log(text);
-            $("#chatLogs").append("<div>" + text + "</div>");
+            $("#waiting").remove();
+            $("#gamevalue").empty();
+            
+            $("#gamevalue").append("<div>" + text + "</div>");
+        }
+
+        socket.on("card_post", function(data){card_post(data.value)});
+        function card_post(text) {
+            console.log(text);
+            $("#gamevalue").append("<h1>" + text + "</h1>");
         }
 
 
@@ -97,6 +106,10 @@
             $("#game").show();
             isEnter = true;
         }
+
+        $('#start_post').on('click', function() {
+            socket.emit("start_post", {value : 'gamestart'});
+        });
     </script>
 </body>
 </html>
