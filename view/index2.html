@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <title>Kogera</title>
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+
+    <!-- メインページ -->
+
+    <div class="bs-component" id="join">
+        <div class="jumbotron">
+            <h1>Kogera</h1>
+            <p>コゲラ対戦ゲーム</p>
+            <form class="form-inline">
+                <div class="form-group">
+                    <label for="nameFrom">名前：</label>
+                    <input type="text" class="form-control" id="nameFrom">
+                </div>
+                <button type="submit" class="btn btn-primary" id="sendButton">入室</button>
+                <button id="test_post">testpost</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ゲームスタート画面 -->
+    <div class="game" id="game">
+        <div class="box__area">
+            <div class="box">
+            <div id="waiting">
+                <h1 >スタートまち</h1>
+            </div>
+            <button id="start_post">開始する</button>
+            
+            <button id="again">もう一度引く</button>
+            <div id="gamevalue"></div>
+        </div>
+    </div>
+
+
+
+<script>
+        $('#game').hide();
+        $('#again').hide();
+        // socketio接続
+        var socket = io.connect();
+
+
+        socket.on("mycard", (message) => {
+            console.log(message);
+        });
+        
+        var isEnter = false;
+
+        socket.on("start_post", function(data){start_post(data.value)});
+        function start_post(text) {
+            console.log(text);
+            console.log('go');
+            $("#waiting").remove();
+            $("#gamevalue").empty();
+            
+            $("#gamevalue").append("<div>" + text + "</div>");
+        }
+
+        socket.on("card_post", function(data){card_post(data.value)});
+        function card_post(card) {
+            console.log(card);
+            $("#gamevalue").append("<h1>" + card + "</h1>");
+            if(card == '?'){
+                $('#again').show();
+                // socket.emit("again", {value : 'again'});
+            }
+        }
+        $('#again').on('click', function() {
+            socket.emit("again", {value : 'again'});
+        });
+
+
+
+
+
+        var isEnter = false;
+        $("form").submit(function(e){
+            // 入力値取得
+            var message = $("#nameFrom").val(); 
+            $("#nameFrom").val('');
+            // 参加済みだったら
+            if (isEnter) {
+              message = "[" + name + "]: " + message;
+              console.log(message);
+                // C03. client_to_serverイベント・データを送信する
+                socket.emit("client_to_server", {value : message});
+
+            //参加処理
+            } else {
+                name = message;
+                var entryMessage = name + "さんが入室しました。";
+                console.log(name);
+                // C05. client_to_server_broadcastイベント・データを送信する
+                socket.emit("client_to_server", {value : entryMessage});
+                // C06. client_to_server_personalイベント・データを送信する
+                socket.emit("client_to_server_personal", {value : name});
+                changeLabel();
+            }
+            e.preventDefault();
+        });
+        function changeLabel() {
+            // $("label").text("メッセージ：");
+            // $("button").text("送信");
+            $("#join").remove();
+            $("#game").show();
+            isEnter = true;
+        }
+
+        $('#start_post').on('click', function() {
+            socket.emit("start_post", {value : 'gamestart'});
+        });
+        $('#test_post').on('click', function() {
+            socket.emit("test_post", {value : 'gamestart'});
+        });
+    </script>
+</body>
+</html>

@@ -14,112 +14,94 @@
 
     <!-- メインページ -->
 
-    <div class="bs-component" id="join">
-        <div class="jumbotron">
-            <h1>Kogera</h1>
-            <p>コゲラ対戦ゲーム</p>
-            <form class="form-inline">
-                <div class="form-group">
-                    <label for="nameFrom">名前：</label>
-                    <input type="text" class="form-control" id="nameFrom">
-                </div>
-                <button type="submit" class="btn btn-primary" id="sendButton">入室</button>
-            </form>
-            <!-- <p><a class="btn btn-primary btn-lg" href="#">開始する</a></p> -->
-        </div>
-    </div>
-
-    <!-- ゲームスタート画面 -->
-    <div class="game" id="game">
-        <div class="box__area">
-            <div class="box">
-            <div id="waiting">
-                <h1 >スタートまち</h1>
-            </div>
-            <button id="start_post">開始する</button>
-            <button id="again">もう一度引く</button>
-            <div id="gamevalue"></div>
-        </div>
-    </div>
+    <h1>simple chat</h1>
+    <input id="inputText" type="text">
+    <input id="sendButton" type="submit">
+    <!-- // JoinButton -->
+    <input id="joinButton" type="submit">
+    <button id="roomJoinButton" type="submit">roomJoinButton</button>
+    <button id="test_postButton" type="submit">開始</button>
+    <button id="roomResetCardButton" type="submit">リセット</button>
+    <ul id="messageList" />
+    <div id="gamevalue"></div>
 
 
 
 <script>
-        $('#game').hide();
-        $('#again').hide();
-        // socketio接続
-        var socket = io.connect();
-        var isEnter = false;
-        // var name = '';
+    // 接続
+    var socket = io.connect();
         
-        // socket.on("server_to_client", function(data){appendMsg(data.value)});
-        // function appendMsg(text) {
-        //     console.log(text);
-        //     $("#chatLogs").append("<div>" + text + "</div>");
-        // }
-
-        socket.on("start_post", function(data){start_post(data.value)});
-        function start_post(text) {
-            console.log(text);
-            $("#waiting").remove();
-            $("#gamevalue").empty();
-            
-            $("#gamevalue").append("<div>" + text + "</div>");
-        }
-
-        socket.on("card_post", function(data){card_post(data.value)});
-        function card_post(card) {
-            console.log(card);
-            $("#gamevalue").append("<h1>" + card + "</h1>");
-            if(card == '?'){
-                $('#again').show();
-                // socket.emit("again", {value : 'again'});
+        // 個人配信取得処理
+        socket.on("clientOnly",(data) => {
+            // console.log(data);
+            switch (data.id) {
+                case 'card':
+                    $("#gamevalue").append("<div>" + data.value + "</div>");
+                    break;
+                default:
+                    break;
             }
-        }
-        $('#again').on('click', function() {
-            socket.emit("again", {value : 'again'});
-        });
+        })
 
-
-
-
-
-        var isEnter = false;
-        $("form").submit(function(e){
-            // 入力値取得
-            var message = $("#nameFrom").val(); 
-            $("#nameFrom").val('');
-            // 参加済みだったら
-            if (isEnter) {
-              message = "[" + name + "]: " + message;
-              console.log(message);
-                // C03. client_to_serverイベント・データを送信する
-                socket.emit("client_to_server", {value : message});
-
-            //参加処理
-            } else {
-                name = message;
-                var entryMessage = name + "さんが入室しました。";
-                console.log(name);
-                // C05. client_to_server_broadcastイベント・データを送信する
-                socket.emit("client_to_server", {value : entryMessage});
-                // C06. client_to_server_personalイベント・データを送信する
-                socket.emit("client_to_server_personal", {value : name});
-                changeLabel();
+        // グループ配信取得処理
+        socket.on("groupOnly",(data) => {
+            // console.log(data);
+            switch (data.id) {
+                case 'card':
+                    // $("#gamevalue").append("<div>" + data.value + "</div>");s
+                    break;
+                case 'noCard':
+                    $("#gamevalue").append("<div>" + data.value + "</div>");
+                    break;
+                default:
+                    break;
             }
-            e.preventDefault();
-        });
-        function changeLabel() {
-            // $("label").text("メッセージ：");
-            // $("button").text("送信");
-            $("#join").remove();
-            $("#game").show();
-            isEnter = true;
-        }
+        })
 
-        $('#start_post').on('click', function() {
-            socket.emit("start_post", {value : 'gamestart'});
+
+        // JoinButton
+        document.getElementById('joinButton').addEventListener('click', () => {
+            console.log("Debug JoinButton Push");
+            socket.emit('test_post', {value : 'aaa'});
         });
+        // Joinの受け取り
+        socket.on("mycard", (message) => {
+            console.log("comen "+message);
+        });
+
+
+
+        // RoomJoin
+        document.getElementById('roomJoinButton').addEventListener('click', () => {
+            console.log("Debug RoomJoinButton Push");
+            socket.emit('roomJoin', {value : 'room1'});
+        });
+
+        // RoomSend
+        document.getElementById('roomResetCardButton').addEventListener('click', () => {
+            console.log("Debug roomResetCardButton Push");
+            socket.emit('roomResetCard', {roomId : 'room1'});
+        });
+
+        // test_postButton
+        document.getElementById('test_postButton').addEventListener('click', () => {
+            console.log("Debug test_postButton Push");
+            socket.emit('test_post', {roomId : 'room1'});
+        });
+        socket.on("test",(message) => {
+            console.log(message);
+        })
+        
+
+
+
+
+        // startの受け取り
+        socket.on("mycard", (message) => {
+            console.log("comen "+message);
+        });
+
+
     </script>
 </body>
 </html>
