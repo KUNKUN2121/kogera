@@ -41,21 +41,29 @@ app.get("/:file", (req, res)=>{
     res.sendFile(DOCUMENT_ROOT + "/css/" + req.params.file);
   });
 
-  //
-
-
 
   var roomCard = settingcard.concat();
   io.sockets.on('connection', function(socket) {
     console.log("接続！");
     
     socket.on('roomJoin' , function (data) {
-        // room == data.value があるか確認
-        room = data.value;
-        socket.join(room);
-        console.log(socket.id + ' さんが' + room + 'に参加しました。');
-        console.log("Now Room " + socket.rooms);  //現在のRoom 一覧
+        roomId = data.value;
+
+        socket.join(roomId);
+        console.log(socket.id + ' さんが' + roomId + 'に参加しました。');
+        socket.emit('joinLog',{value: socket.id+'さん参加'});
+
         roomCard = settingcard.concat();
+
+        // 参加者取得
+          const clients = io.sockets.adapter.rooms.get(roomId);
+          const numClients = clients ? clients.size : 0;
+          if(clients == null){
+              console.log("ルーム名 : "+roomId+" の参加者がいません")
+              return;
+          }
+          console.log('grooooooop '+ numClients);
+          io.to(roomId).emit('groupSetting',{roomPlayers: numClients});
     });
 
     socket.on('roomResetCard' , function(data){
@@ -65,41 +73,52 @@ app.get("/:file", (req, res)=>{
         console.log(settingcard);
         roomCard = settingcard.concat();
     });
-
+    socket.on('test', function(data) {
+        console.log('test')
+    });
 
 
     
-    socket.on('test_post', function(data) {
+    socket.on('gameStartPost', function(data) {
         console.log("開始Post");
         roomId= data.roomId;
         //ルームのすべてのクライントIDを取得
         const clients = io.sockets.adapter.rooms.get(roomId);
         const numClients = clients ? clients.size : 0;
         if(clients == null){
-            console.log("undi")
+            console.log("ルーム名 : "+roomId+" の参加者がいません")
             return;
         }
         // カードシャッフル
         arrayShuffle(roomCard);
-        // console.log(roomCard);
-        // console.log(roomCard.length)
         if(roomCard.length < numClients){
-            io.to(roomId).emit('groupOnly',{id:'noCard',value:"もうないよ；；"});
+            io.to(roomId).emit('group',{id:'noCard',value:"もうないよ；；"});
+            roomCard = settingcard.concat();
             return;
         }
         for (const clientId of clients ) {
             var clientCard = roomCard.pop(); 
             // ルーム内 1人 ソケット
             const clientSocket = io.sockets.sockets.get(clientId);
-            clientSocket.emit('clientOnly', {id: "card", value: "clientOnlyMessage" + clientCard});
+            clientSocket.emit('client', {id: "card", value: "" + clientCard});
             // clientSocket.leave('room1'); // ゲーム終了時退出
-       
        }
-        // socket.emit("test", "受け取ったやつ ");
-        
       });
-});
 
+      socket.on('kogera', function(data) {
+          roomId = data.roomId;
+          user = socket.id;
+          kogera();
+          // ライフを１減らす。
+          // 
+          
+          // 次のカード送信する。(別画画面だからここじゃない
+      });
+
+});
+function kogera(params) {
+
+}
 
 
 

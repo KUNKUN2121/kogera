@@ -14,9 +14,9 @@
 
     <!-- メインページ -->
 
-    <h1>simple chat</h1>
-    <input id="inputText" type="text">
-    <input id="sendButton" type="submit">
+    <!-- <h1>simple chat</h1> -->
+    <!-- <input id="inputText" type="text">
+    <input id="sendButton" type="submit"> -->
     <!-- // JoinButton -->
     <input id="joinButton" type="submit">
     <button id="roomJoinButton" type="submit">roomJoinButton</button>
@@ -32,7 +32,7 @@
     var socket = io.connect();
         
         // 個人配信取得処理
-        socket.on("clientOnly",(data) => {
+        socket.on("client",(data) => {
             // console.log(data);
             switch (data.id) {
                 case 'card':
@@ -44,7 +44,7 @@
         })
 
         // グループ配信取得処理
-        socket.on("groupOnly",(data) => {
+        socket.on("group",(data) => {
             // console.log(data);
             switch (data.id) {
                 case 'card':
@@ -62,7 +62,7 @@
         // JoinButton
         document.getElementById('joinButton').addEventListener('click', () => {
             console.log("Debug JoinButton Push");
-            socket.emit('test_post', {value : 'aaa'});
+            socket.emit('gameStartPost', {value : 'aaa'});
         });
         // Joinの受け取り
         socket.on("mycard", (message) => {
@@ -86,7 +86,7 @@
         // test_postButton
         document.getElementById('test_postButton').addEventListener('click', () => {
             console.log("Debug test_postButton Push");
-            socket.emit('test_post', {roomId : 'room1'});
+            socket.emit('gameStartPost', {roomId : 'room1'});
         });
         socket.on("test",(message) => {
             console.log(message);
