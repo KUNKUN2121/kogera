@@ -22,10 +22,10 @@ const settingcard = [
     '0','0','0',
     '-5','-5',
     '-10',
-    "x2",
-    "÷2",
-    "MAX->0",
-    "？",
+    'x2',
+    '/2',
+    'MAX->0',
+    // '？',
   ];
   const DOCUMENT_ROOT = __dirname + "/view";
 
@@ -96,14 +96,30 @@ app.get("/:file", (req, res)=>{
             roomCard = settingcard.concat();
             return;
         }
+        
+        // 配布処理
+        var goukei = 0;
         for (const clientId of clients ) {
-            var clientCard = roomCard.pop(); 
+            var clientCard = roomCard.pop();  // カード取り出し
+            if(!isNaN(Number(clientCard))){   // 数値判断
+              goukei = goukei + Number(clientCard);
+            }else{
+              // 数字じゃない場合（特殊文字の処理）
+              // x2 /2 とかはあとから処理しないといかんよね。
+            }
             // ルーム内 1人 ソケット
             const clientSocket = io.sockets.sockets.get(clientId);
             clientSocket.emit('client', {id: "card", value: "" + clientCard});
             // clientSocket.leave('room1'); // ゲーム終了時退出
        }
+       // ここで特殊文字を処理する。
+      //  1. ? 未実装
+      //  2. MAX->0
+      //  3. x2 /2
+      //  console.log(goukei);
       });
+
+
 
       socket.on('kogera', function(data) {
           roomId = data.roomId;
