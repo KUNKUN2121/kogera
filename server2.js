@@ -18,14 +18,15 @@ const settingcard = [
     '5','5','5',
     '4','4','4',
     '3','3','3',
-    '2','2','2',,
+    '2','2','2',
     '0','0','0',
     '-5','-5',
     '-10',
     'x2',
     '/2',
-    'MAX->0',
+    'Max0',
     // '？',
+    // 偶数は0
   ];
   const DOCUMENT_ROOT = __dirname + "/view";
 
@@ -81,6 +82,7 @@ app.get("/:file", (req, res)=>{
     
     socket.on('gameStartPost', function(data) {
         console.log("開始Post");
+        console.log("----------------");
         roomId= data.roomId;
         //ルームのすべてのクライントIDを取得
         const clients = io.sockets.adapter.rooms.get(roomId);
@@ -99,24 +101,50 @@ app.get("/:file", (req, res)=>{
         
         // 配布処理
         var goukei = 0;
-        for (const clientId of clients ) {
+        var tempFun = [];
+        var max = -10;
+        for (const clientId of clients) {
             var clientCard = roomCard.pop();  // カード取り出し
-            if(!isNaN(Number(clientCard))){   // 数値判断
+
+            // 数値判断
+            if(!isNaN(Number(clientCard))){
+              // 数値を計算
+              if(Number(clientCard) > max){
+                max = clientCard;
+                // クロージャ 遅延評価?
+              }
               goukei = goukei + Number(clientCard);
             }else{
-              // 数字じゃない場合（特殊文字の処理）
-              // x2 /2 とかはあとから処理しないといかんよね。
+              // 数値以外を一旦配列に入れておく
+              tempFun.push(clientCard);
             }
-            // ルーム内 1人 ソケット
+            // ルーム クライント 送信する。
             const clientSocket = io.sockets.sockets.get(clientId);
             clientSocket.emit('client', {id: "card", value: "" + clientCard});
-            // clientSocket.leave('room1'); // ゲーム終了時退出
        }
-       // ここで特殊文字を処理する。
-      //  1. ? 未実装
-      //  2. MAX->0
-      //  3. x2 /2
-      //  console.log(goukei);
+      // 特殊文字処理
+      tempFun.forEach(function(value){
+        console.log('変換します' + value);
+        switch (value) {
+          case 'Max0':
+            goukei = goukei - max ;
+            console.log(goukei);
+            break;
+          case 'x2':
+            goukei = goukei  * 2 ;
+            console.log('かける２' + goukei);
+            break;
+          case '/2':
+            goukei = goukei / 2;
+            console.log('わる２' + goukei);
+            break;
+          default:
+            break;
+        }
+      });
+      console.log('合計 : ' + goukei);
+      console.log('max : ' + max);
+      io.to(roomId).emit('groupGoukei',{value: goukei});
       });
 
 
@@ -132,6 +160,7 @@ app.get("/:file", (req, res)=>{
       });
 
 });
+            // clientSocket.leave('room1'); // ゲーム終了時退出
 function kogera(params) {
 
 }
