@@ -47,6 +47,7 @@ app.get("/:file", (req, res)=>{
   io.sockets.on('connection', function(socket) {
     console.log("接続！");
     
+    ///[ROOM]参加処理
     socket.on('roomJoin' , function (data) {
         roomId = data.value;
 
@@ -66,6 +67,24 @@ app.get("/:file", (req, res)=>{
           console.log('grooooooop '+ numClients);
           io.to(roomId).emit('groupSetting',{roomPlayers: numClients});
     });
+
+
+    ///ゲーム情報 roomEvent処理
+    io.on('roomEvent') , function(data){
+      // ルーム名ID取得
+      // MemEvent(ユーザ数変化)
+      io.to(roomId).emit('MemEvent' ,{});
+      // game (ゲーム情報)
+      io.to(roomId).emit('game' ,{});
+      // koyotePost (コヨーテFirst)
+      io.to(roomId).emit('koyotePost' ,{});
+      // KoyoteResult (結果)
+      io.to(roomId).emit('koyotePost' ,{});
+      // koyotePost (コヨーテFirst)
+      io.to(roomId).emit('koyotePost' ,{});
+
+    }
+
 
     socket.on('roomResetCard' , function(data){
         roomId= data.roomId;
@@ -159,13 +178,17 @@ app.get("/:file", (req, res)=>{
           // 次のカード送信する。(別画画面だからここじゃない
       });
 
+      socket.on('kogeraWait', function(data) {
+        console.log('gotokogerawait');
+        var roomId = data.roomId;
+        io.to(roomId).emit('kogeraWait',{});
+      });
+
 });
             // clientSocket.leave('room1'); // ゲーム終了時退出
 function kogera(params) {
 
 }
-
-
 
 
 // 配列シャッフル 
