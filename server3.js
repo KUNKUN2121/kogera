@@ -55,25 +55,26 @@ function room(roomId, userId) {
       this.roomCard = settingcard.concat();
     };
 
-  this.addUser = function(userId) {
-      this.user.push([userId, 3, 'undifindCard']);
+  this.addUser = function(userId,usrName) {
+      this.user.push([userId, usrName, 3, 'undifindCard']);
       // TODO ここで変化のFunctionを作る。
     };
 }
-
+testroom = new room('room1');
   io.sockets.on('connection', function(socket) {
     ///[roomEvent] 
         /// (roomJoin) 部屋参加
         socket.on('roomJoin' , function (data) {
             roomId = data.roomId;
+            usrName = data.usrName;
             socket.join(roomId);
             // ルームコンストラクタ作成
-            testroom = new room(roomId);
+            // testroom = new room(roomId);
             // ユーザ追加
-            testroom.addUser(socket.id);
-
+            testroom.addUser(socket.id, usrName);
             // Debug
             console.log(testroom.user);
+            // console.log("name : "+testroom.user[0][0]);
             console.log(socket.id + ' さんが' + data.roomId + 'に参加しました。');
         });
         
@@ -97,7 +98,7 @@ function room(roomId, userId) {
 
     /// 退出処理
     socket.on("disconnecting", () => {
-        console.log(socket.rooms); // the Set contains at least the socket ID
+        console.log('抜けたよー'+socket.rooms); // the Set contains at least the socket ID
       });
     socket.on("disconnect", () => {
         // socket.rooms.size === 0
@@ -168,6 +169,17 @@ function arrayShuffle(array) {
         for (const clientId of clients) {
             // カード取り出し
             var clientCard = testroom.roomCard.pop();
+            // 検索機能
+            console.log(clientId + ' の検索開始')
+            for(i=0; i < numClients; i++){
+              console.log("行きます "+i);
+              if(testroom.user[i][0] == clientId){
+                console.log('あったよん！');
+                testroom.user[i][3] = clientCard;
+                console.log('------------------' + clientCard);
+              }
+              console.log('再続行--------');
+            }
 
             if(!isNaN(Number(clientCard))){
               // 数値の場合
@@ -182,8 +194,8 @@ function arrayShuffle(array) {
               tempFun.push(clientCard);
             }
             // ルーム クライント 送信する。
-            const clientSocket = io.sockets.sockets.get(clientId);
-            clientSocket.emit('client', {id: "card", value: "" + clientCard});
+            // const clientSocket = io.sockets.sockets.get(clientId);
+            // clientSocket.emit('client', {id: "card", value: "" + clientCard});
        }
       // 特殊文字処理
       tempFun.forEach(function(value){
@@ -208,4 +220,5 @@ function arrayShuffle(array) {
       console.log('max : ' + max);
       console.log('合計 : ' + goukei);
       io.to(roomId).emit('groupGoukei',{value: goukei});
+      // console.log(testroom);
     }
