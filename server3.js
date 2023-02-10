@@ -45,19 +45,36 @@ app.get("/:file", (req, res)=>{
 
 ////////////////////////////////////////////////////////////
 
-  var roomCard = settingcard.concat();
+
+function room(roomId, userId) {
+  this.roomId = roomId;
+  this.roomCard = settingcard.concat();
+  this.user = [];
+
+  this.reset = function() {
+      this.roomCard = settingcard.concat();
+    };
+
+  this.addUser = function(userId) {
+      this.user.push([userId, 3, 'undifindCard']);
+      // TODO ここで変化のFunctionを作る。
+    };
+}
 
   io.sockets.on('connection', function(socket) {
-
-
     ///[roomEvent] 
         /// (roomJoin) 部屋参加
         socket.on('roomJoin' , function (data) {
-            socket.join(data.roomId);
+            roomId = data.roomId;
+            socket.join(roomId);
+            // ルームコンストラクタ作成
+            testroom = new room(roomId);
+            // ユーザ追加
+            testroom.addUser(socket.id);
+
+            // Debug
+            console.log(testroom.user);
             console.log(socket.id + ' さんが' + data.roomId + 'に参加しました。');
-            // TODO ここで変化のFunctionを作る。
-            // カード結合
-            roomCard = settingcard.concat();
         });
         
         /// (gameStart) ゲーム開始
@@ -122,10 +139,6 @@ function arrayShuffle(array) {
   }
 
 
-
-
-
-
   function gamestart(data) {
   console.log("開始Post");
         // ルームID取得
@@ -137,11 +150,11 @@ function arrayShuffle(array) {
         numClients = clientsddd.numClients;
 
         // カードシャッフル
-        arrayShuffle(roomCard);
-        if(roomCard.length < numClients){
+        arrayShuffle(testroom.roomCard);
+        if(testroom.roomCard.length < numClients){
             // カードが人数分なかったときの処理
             io.to(roomId).emit('group',{id:'noCard',value:"もうないよ；；"});
-            roomCard = settingcard.concat();
+            testroom.reset();
             return;
         }
         
@@ -154,9 +167,7 @@ function arrayShuffle(array) {
         // クライントにforで送信
         for (const clientId of clients) {
             // カード取り出し
-            var clientCard = roomCard.pop();  
-            var roomshare;
-            roomshare.clientId = clientCard;
+            var clientCard = testroom.roomCard.pop();
 
             if(!isNaN(Number(clientCard))){
               // 数値の場合
@@ -194,74 +205,7 @@ function arrayShuffle(array) {
             break;
         }
       });
-      console.log('合計 : ' + goukei);
       console.log('max : ' + max);
-      io.to(roomId).emit('groupGoukei',{value: goukei});
-    }
-    function keisan(params) {
-        //人数取得
-        clientsddd =roomMemFun(roomId);
-        numClients = clientsddd.numClients;
-        
-        // カードシャッフル
-        arrayShuffle(roomCard);
-        if(roomCard.length < numClients){
-            // カードが人数分なかったときの処理
-            io.to(roomId).emit('group',{id:'noCard',value:"もうないよ；；"});
-            roomCard = settingcard.concat();
-            return;
-        }
-
-                // 人数分計算する。
-                /// 配布処理
-        // 初期化
-        var goukei = 0;
-        var tempFun = [];
-        var max = -10;
-
-        // クライントにforで送信
-        for (const clientId of clients) {
-            // カード取り出し
-            var clientCard = roomCard.pop();  
-
-            // 数値判断
-            if(!isNaN(Number(clientCard))){
-              // 数値を計算
-              if(Number(clientCard) > max){
-                max = clientCard;
-                // クロージャ 遅延評価?
-              }
-              goukei = goukei + Number(clientCard);
-            }else{
-              // 数値以外を一旦配列に入れておく
-              tempFun.push(clientCard);
-            }
-            // ルーム クライント 送信する。
-
-            const clientSocket = io.sockets.sockets.get(clientId);
-            clientSocket.emit('client', {id: "card", value: "" + clientCard});
-       }
-      // 特殊文字処理
-      tempFun.forEach(function(value){
-        console.log('変換します' + value);
-        switch (value) {
-          case 'Max0':
-            goukei = goukei - max ;
-            console.log(goukei);
-            break;
-          case 'x2':
-            goukei = goukei  * 2 ;
-            console.log('かける２' + goukei);
-            break;
-          case '/2':
-            goukei = goukei / 2;
-            console.log('わる２' + goukei);
-            break;
-          default:
-            break;
-        }
-      });
       console.log('合計 : ' + goukei);
-      console.log('max : ' + max);
       io.to(roomId).emit('groupGoukei',{value: goukei});
     }

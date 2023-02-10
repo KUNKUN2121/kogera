@@ -45,3 +45,15 @@ console.log(r001.roomid);
 // console.log(r001.card);
 // console.log(r001.user[0][1]);
 console.log(r001.user);
+
+
+
+
+var name = 'abcd';
+
+// 下のように 変数名を nameで定義した [ abcd ]にしたい。
+acbd = new room(1, null ,userlist);
+
+
+// こうすると name に代入してしまう
+name = new room(1, null ,userlist);
