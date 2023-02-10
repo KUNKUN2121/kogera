@@ -74,7 +74,7 @@
         // RoomJoin
         document.getElementById('roomJoinButton').addEventListener('click', () => {
             console.log("Debug RoomJoinButton Push");
-            socket.emit('roomJoin', {value : 'room1'});
+            socket.emit('roomJoin', {roomId : 'room1'});
         });
 
         // RoomSend
@@ -86,7 +86,7 @@
         // test_postButton
         document.getElementById('test_postButton').addEventListener('click', () => {
             console.log("Debug test_postButton Push");
-            socket.emit('gameStartPost', {roomId : 'room1'});
+            socket.emit('gamestart', {roomId : 'room1'});
         });
         socket.on("test",(message) => {
             console.log(message);
