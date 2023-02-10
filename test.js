@@ -54,8 +54,8 @@ app.get("/:file", (req, res)=>{
       });
 
 
-      var array = [1, 2, 3, 4]; 
-      var arrayToString = JSON.stringify(Object.assign({}, array));  // convert array to string
-      var stringToJsonObject = JSON.parse(arrayToString);  // convert string to json object
-       
-      console.log(stringToJsonObject);
+      var json = {
+        "name": "taro",
+        "age": "30",
+        "tel": "090-0123-4567"
+    }
