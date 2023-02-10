@@ -42,6 +42,9 @@
                     break;
             }
         })
+        socket.on("groupAll",(data) => {
+            console.log(data);   
+        })
 
         // グループ配信取得処理
         socket.on("group",(data) => {

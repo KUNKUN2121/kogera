@@ -3,6 +3,7 @@ const http = require("http").createServer(app);
 const io   = require("socket.io")(http);
 const crypto = require('crypto');
 const { userInfo } = require("os");
+const { all } = require("proxy-addr");
 const send = require("send");
 
 /**
@@ -76,6 +77,8 @@ testroom = new room('room1');
             console.log(testroom.user);
             // console.log("name : "+testroom.user[0][0]);
             console.log(socket.id + ' さんが' + data.roomId + 'に参加しました。');
+            io.to(socket.id).emit('youId', {id : socket.id})
+            // TODO : グループの人数を送信するやつ作る
         });
         
         /// (gameStart) ゲーム開始
@@ -99,6 +102,8 @@ testroom = new room('room1');
     /// 退出処理
     socket.on("disconnecting", () => {
         console.log('抜けたよー'+socket.rooms); // the Set contains at least the socket ID
+        // TODO : ここでルーム抜けた処理を作る
+        // TODO : Functionで配列の場所わかるのもいいかも。
       });
     socket.on("disconnect", () => {
         // socket.rooms.size === 0
@@ -217,8 +222,10 @@ function arrayShuffle(array) {
             break;
         }
       });
+
+      var json_text = JSON.stringify(testroom.user);
       console.log('max : ' + max);
       console.log('合計 : ' + goukei);
-      io.to(roomId).emit('groupGoukei',{value: goukei});
+      io.to(roomId).emit('groupAll',{goukei: goukei, userList:testroom.user});
       // console.log(testroom);
     }

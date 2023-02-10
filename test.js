@@ -1,3 +1,17 @@
+const app  = require("express")();
+const http = require("http").createServer(app);
+const io   = require("socket.io")(http);
+const crypto = require('crypto');
+const { userInfo } = require("os");
+const send = require("send");
+
+/**
+ * 3000番でサーバを起動する
+ */
+ http.listen(3000, ()=>{
+  console.log("listening on *:3000");
+});
+
 const settingcard = [
     '20',
     '15','15',
@@ -15,45 +29,33 @@ const settingcard = [
     // '？',
     // 偶数は0
   ];
+  const DOCUMENT_ROOT = __dirname + "/view";
 
-function room(roomid, card ,user) {
-    this.roomid = roomid;
-    this.card = settingcard.concat();
-    this.user = user;
+app.get("/", (req, res)=>{
+  res.sendFile(DOCUMENT_ROOT + "/index.html");
+});
 
-    this.reset = function() {
-        this.card = settingcard.concat();
-      };
-}
-// ルームIDごとにコンストラクトを作成する。
-// 内容
-//  user 配列。
-var userlist = [];
-userlist.push(
-    // id , life , card
-    ['001', '1', 'card'],
-    ['002', '5', 'card'],
-    ['003', '3', 'card'],
-    ['004', '2', 'card'],
-    ['005', '2', 'card'],
-    );
+app.get("/:file", (req, res)=>{
+    res.sendFile(DOCUMENT_ROOT + "/" + req.params.file);
+  });
 
+  app.get("/css/:file", (req, res)=>{
+    res.sendFile(DOCUMENT_ROOT + "/css/" + req.params.file);
+  });
 
+////////////////////////////////////////////////////////////
 
-var r001 = new room(1, null ,userlist);
-console.log(r001.roomid);
-// console.log(r001.card);
-// console.log(r001.user[0][1]);
-console.log(r001.user);
+  io.sockets.on('connection', function(socket) {
+    ///[roomEvent] 
+        /// (roomJoin) 部屋参加
+        socket.on('roomJoin' , function (data) {
+
+        });
+      });
 
 
-
-
-var name = 'abcd';
-
-// 下のように 変数名を nameで定義した [ abcd ]にしたい。
-acbd = new room(1, null ,userlist);
-
-
-// こうすると name に代入してしまう
-name = new room(1, null ,userlist);
+      var array = [1, 2, 3, 4]; 
+      var arrayToString = JSON.stringify(Object.assign({}, array));  // convert array to string
+      var stringToJsonObject = JSON.parse(arrayToString);  // convert string to json object
+       
+      console.log(stringToJsonObject);
