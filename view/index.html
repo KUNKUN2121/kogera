@@ -61,6 +61,13 @@
             }
         })
 
+            socket.on("groupAll",(data) => {
+        userList = data['userList'];
+        // print('client 受信 ID : ' + data['id']);
+        print(data['goukei']);
+        print(data['userList']);
+        });
+
 
         // JoinButton
         document.getElementById('joinButton').addEventListener('click', () => {

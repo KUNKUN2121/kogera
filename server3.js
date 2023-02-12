@@ -89,11 +89,49 @@ testroom = new room('room1');
         /// (kogeraPost) kogeraWait
         socket.on('kogeraPost' , function (data) {
             console.log('kogera');
-            io.to(data.roomId).emit('kogeraPost',{});
+            io.to(data.roomId).emit('kogeraPost',{sayKogeraUser : socket.id});
         });
 
-        socket.on('kogeraResult' , function (data) {
+        socket.on('kogeraResultPost' , function (data) {
+          console.log('kogeraResultPost');
+          roomId = data.roomId;
+          clientsddd =roomMemFun(roomId);
+          numClients = clientsddd.numClients;
+          if(data.win){
+            //こげらって言った人の勝ちなら
+            // kogeraPreSayUserId //ライフ落とす
+              for(i=0; i < numClients; i++){
+                // 買った人検索
+                if(data.kogeraSayUser == testroom.user[i][0]){
+                  winUserId = testroom.user[i][0];
+                }
+                // 負けた人検索
+                if(data.kogeraPreSayUserId == testroom.user[i][0]){
+                  loseUserId = testroom.user[i][0];
+                  testroom.user[i][2] = testroom.user[i][2] - 1;
+                }
+              }
 
+          }else{
+            //こげらって言った人の負けなら
+            // kogeraSayUser //ライフさげる
+              for(i=0; i < numClients; i++){
+                // 買った人検索
+                if(data.kogeraPreSayUserId == testroom.user[i][0]){
+                  winUserId = testroom.user[i][0];
+                }
+                //負けた人検索
+                if(data.kogeraSayUser == testroom.user[i][0]){
+                  loseUserId = testroom.user[i][0]
+                  testroom.user[i][2] = testroom.user[i][2] - 1;
+                }
+              }
+          }
+          io.to(data.roomId).emit('kogeraResultPost',{
+            winUserId : winUserId,
+            loseUserId : loseUserId,
+            kogeraSayUser : data.kogeraSayUser,
+          });
         });
 
         socket.on('roomClose' , function (data) {
