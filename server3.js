@@ -139,7 +139,20 @@ testroom = new room('room1');
 
     /// 退出処理
     socket.on("disconnecting", () => {
-        console.log('抜けたよー'+socket.rooms); // the Set contains at least the socket ID
+        // console.log('抜けたよー'+socket.rooms); // the Set contains at least the socket ID
+
+        for(i=0; i < testroom.user.length; i++){
+          if(socket.id == testroom.user[i][0]){
+            // なぜか最初の配列だけ消されないので対策
+            if(i==0){
+              testroom.user.shift();
+            }
+            testroom.user.splice( i, i );
+            console.log(testroom.user);
+            console.log('削除した');
+          }
+        }
+
         // TODO : ここでルーム抜けた処理を作る
         // TODO : Functionで配列の場所わかるのもいいかも。
       });
