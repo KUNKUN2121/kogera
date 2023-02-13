@@ -136,6 +136,10 @@ testroom = new room('room1');
           });
         });
 
+        socket.on('gameEnd' , function (data) {
+          io.to(data.roomId).emit('gameEnd',{
+          });
+        });
         socket.on('roomClose' , function (data) {
         });
 
