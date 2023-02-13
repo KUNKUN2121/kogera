@@ -128,9 +128,11 @@ testroom = new room('room1');
               }
           }
           io.to(data.roomId).emit('kogeraResultPost',{
+            win : data.win,
             winUserId : winUserId,
             loseUserId : loseUserId,
             kogeraSayUser : data.kogeraSayUser,
+            kogeraPreSayNumber : data.kogeraPreSayNumber,
           });
         });
 
