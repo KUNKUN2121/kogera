@@ -116,23 +116,20 @@ testroom = new room('room1');
             //こげらって言った人の負けなら
             // kogeraSayUser //ライフさげる
               for(i=0; i < numClients; i++){
-                // 買った人検索
-                if(data.kogeraPreSayUserId == testroom.user[i][0]){
-                  winUserId = testroom.user[i][0];
-                }
-                //負けた人検索
+                // 勝った人は送らないのでNull
+                // 負けた人検索
                 if(data.kogeraSayUser == testroom.user[i][0]){
                   loseUserId = testroom.user[i][0]
                   testroom.user[i][2] = testroom.user[i][2] - 1;
                 }
               }
+              winUserId = null;
           }
           io.to(data.roomId).emit('kogeraResultPost',{
             win : data.win,
             winUserId : winUserId,
             loseUserId : loseUserId,
             kogeraSayUser : data.kogeraSayUser,
-            kogeraPreSayNumber : data.kogeraPreSayNumber,
           });
         });
 
